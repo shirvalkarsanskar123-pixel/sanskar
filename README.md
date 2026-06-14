@@ -49,7 +49,7 @@ A custom **Feedforward/Backpropagation Neural Network (ANN)** is coded from scra
 ### E. Goal Tracker & Progress Ring
 Allows users to toggle eco commitments (e.g., swapping LED lights, turning off vampire loads). Toggling completions deducts simulated offsets from their active carbon score, updating the dashboard trend line and animating the SVG progress circle.
 
-6. Future Scope
+### 4. Future Scope
 - **IoT Smart Home Integration**: Link the simulator to actual smart home APIs (like Home Assistant) to switch appliance loads based on real-time carbon grid signals.
 - **Machine Learning API**: Expand the rule-based recommender to consume multi-user datasets and utilize clustering algorithms (like K-Means) to predict user conservation success rates.
 - **Global Database Syncing**: Integrate a cloud database (such as Firebase) to enable users to log in, save historical footprint timelines permanently, and compete in community eco-leaderboards.

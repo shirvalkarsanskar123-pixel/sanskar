@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoTrace AI - Carbon Footprint Optimizer & AI Assistant</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="EcoTrace AI is an interactive platform built for SDG 13 (Climate Action) that leverages AI to calculate carbon footprints, optimize energy grids, and suggest custom lifestyle improvements.">
+  <meta name="keywords" content="SDG 13, Climate Action, Carbon Footprint, AI Smart Grid, Machine Learning Simulator, Carbon Calculator, EcoBot">
+  <meta name="author" content="AI Final Project">
+  
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Canvas Confetti for celebrating user progress -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Sticky Header -->
+    <header>
+      <div class="nav-wrapper">
+        <div class="logo">
+          <i class="fa-solid fa-seedling"></i>
+          <span>EcoTrace <span class="gradient-text">AI</span></span>
+        </div>
+        <nav>
+          <ul>
+            <li>
+              <button class="nav-btn active" id="btn-tab-dashboard" onclick="switchTab('dashboard')">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+              </button>
+            </li>
+            <li>
+              <button class="nav-btn" id="btn-tab-calc" onclick="switchTab('calc')">
+                <i class="fa-solid fa-calculator"></i> Calculator
+              </button>
+            </li>
+            <li>
+              <button class="nav-btn" id="btn-tab-chat" onclick="switchTab('chat')">
+                <i class="fa-solid fa-robot"></i> EcoBot Chat
+              </button>
+            </li>
+            <li>
+              <button class="nav-btn" id="btn-tab-grid" onclick="switchTab('grid')">
+                <i class="fa-solid fa-network-wired"></i> Smart Grid AI
+              </button>
+            </li>
+            <li>
+              <button class="nav-btn" id="btn-tab-goals" onclick="switchTab('goals')">
+                <i class="fa-solid fa-circle-check"></i> Eco Goals
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+
+      <!-- ==========================================
+           1. DASHBOARD TAB
+           ========================================== -->
+      <section id="tab-dashboard" class="tab-section active">
+        <div class="dashboard-hero mb-3">
+          <div class="card score-display-card glow-green">
+            <div class="score-metric">
+              <h3 class="mb-1">Your Carbon Footprint</h3>
+              <div class="score-value" id="dashboard-footprint-value">0.0</div>
+              <div class="score-unit">Metric Tons CO₂e / Year</div>
+            </div>
+            <div class="score-metric text-center">
+              <h4 class="mb-1">Eco Rating</h4>
+              <div class="score-status status-low" id="dashboard-status-badge">Calculating...</div>
+              <p class="text-secondary mt-1" id="dashboard-vs-average">Fill out calculator to see rating</p>
+            </div>
+          </div>
+          <div class="card flex-column">
+            <h3>AI Quick Insights</h3>
+            <div class="quick-insights" id="dashboard-insights-container">
+              <div class="insight-item">
+                <div class="insight-icon"><i class="fa-solid fa-info-circle"></i></div>
+                <div class="insight-content">
+                  <h4>Welcome to EcoTrace AI</h4>
+                  <p>Open the Calculator tab to evaluate your lifestyle footprint and receive customized AI reductions.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <h3>Emission Breakdown</h3>
+            <p class="text-secondary mb-2">Detailed breakdown of emissions by sector</p>
+            <div class="chart-container">
+              <canvas id="breakdownChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Your Emissions Journey</h3>
+            <p class="text-secondary mb-2">Historical tracking of calculated scores over time</p>
+            <div class="chart-container">
+              <canvas id="historyChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           2. CARBON CALCULATOR TAB
+           ========================================== -->
+      <section id="tab-calc" class="tab-section">
+        <div class="calculator-layout">
+          <!-- Wizard Form Panel -->
+          <div class="card">
+            <div class="step-indicator">
+              <div class="step-node active" id="step-node-1">1</div>
+              <div class="step-node" id="step-node-2">2</div>
+              <div class="step-node" id="step-node-3">3</div>
+            </div>
+            
+            <form id="footprint-form" onsubmit="event.preventDefault();">
+              
+              <!-- STEP 1: HOME ENERGY -->
+              <div class="calc-step active" id="calc-step-1">
+                <h3 class="mb-1">Step 1: Household Energy</h3>
+                <p class="text-secondary mb-3">Tell us about your home power sources and utility levels.</p>
+                
+                <div class="form-group">
+                  <label for="input-electricity">Monthly Electricity Bill ($)</label>
+                  <input type="range" class="input-control" id="input-electricity" min="0" max="300" value="75" oninput="updateRangeLabel('label-electricity', this.value, '$')">
+                  <div class="d-flex justify-between mt-1 text-secondary">
+                    <span>Low ($0)</span>
+                    <span id="label-electricity" class="font-weight-600 text-white">$75</span>
+                    <span>High ($300+)</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-heating">Heating & Cooking Fuel</label>
+                  <select class="input-control" id="input-heating" onchange="runLiveCalculator()">
+                    <option value="natural-gas">Natural Gas</option>
+                    <option value="electricity">Electric / Heat Pump</option>
+                    <option value="oil">Heating Oil</option>
+                    <option value="wood">Wood / Biomass</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-solar">Renewable Energy Source</label>
+                  <select class="input-control" id="input-solar" onchange="runLiveCalculator()">
+                    <option value="none">Grid Power (Non-renewable)</option>
+                    <option value="partial">Partial Solar / Clean Grid Contract</option>
+                    <option value="full">100% Home Solar & Storage</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- STEP 2: TRANSPORTATION -->
+              <div class="calc-step" id="calc-step-2">
+                <h3 class="mb-1">Step 2: Transportation & Travel</h3>
+                <p class="text-secondary mb-3">Vehicles and travel habits are often the largest emission sources.</p>
+                
+                <div class="form-group">
+                  <label for="input-commute">Weekly Commute (Miles driven)</label>
+                  <input type="range" class="input-control" id="input-commute" min="0" max="500" value="100" oninput="updateRangeLabel('label-commute', this.value, ' miles')">
+                  <div class="d-flex justify-between mt-1 text-secondary">
+                    <span>None (0)</span>
+                    <span id="label-commute" class="font-weight-600 text-white">100 miles</span>
+                    <span>Long commute (500)</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-vehicle-type">Primary Vehicle Fuel Type</label>
+                  <select class="input-control" id="input-vehicle-type" onchange="runLiveCalculator()">
+                    <option value="gasoline">Gasoline / Diesel Car</option>
+                    <option value="hybrid">Hybrid Vehicle</option>
+                    <option value="electric">Electric Vehicle (EV)</option>
+                    <option value="none">No Car (Public Transit / Bike / Walk)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-flights">Annual Flight Duration (Hours flown)</label>
+                  <input type="range" class="input-control" id="input-flights" min="0" max="60" value="5" oninput="updateRangeLabel('label-flights', this.value, ' hours')">
+                  <div class="d-flex justify-between mt-1 text-secondary">
+                    <span>None</span>
+                    <span id="label-flights" class="font-weight-600 text-white">5 hours</span>
+                    <span>Frequent Flyer (60h)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 3: FOOD & DIET -->
+              <div class="calc-step" id="calc-step-3">
+                <h3 class="mb-1">Step 3: Food Habits & Waste</h3>
+                <p class="text-secondary mb-3">Diet impacts carbon footprints via land use and transport chains.</p>
+                
+                <div class="form-group">
+                  <label for="input-diet">Dietary Preferences</label>
+                  <select class="input-control" id="input-diet" onchange="runLiveCalculator()">
+                    <option value="heavy-meat">Frequent Meat Consumer (Beef / Pork)</option>
+                    <option value="moderate-meat">Balanced (Chicken, Fish, Occasional Beef)</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="vegan">Vegan</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-waste">How much food goes to waste in your home?</label>
+                  <select class="input-control" id="input-waste" onchange="runLiveCalculator()">
+                    <option value="high">Significant (Leftovers discarded regularly)</option>
+                    <option value="moderate">Average (Some food discarded weekly)</option>
+                    <option value="low">Minimal (Plan meals, compost scraps)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-recycle">Do you sort and recycle waste?</label>
+                  <select class="input-control" id="input-recycle" onchange="runLiveCalculator()">
+                    <option value="no">Rarely / No Recycling System</option>
+                    <option value="some">Recycle cardboard and bottles only</option>
+                    <option value="yes">Rigorous Sorting & Composting</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Navigation Controls -->
+              <div class="calc-buttons">
+                <button type="button" class="btn" id="calc-btn-prev" onclick="changeCalcStep(-1)" disabled>
+                  <i class="fa-solid fa-arrow-left"></i> Previous
+                </button>
+                <button type="button" class="btn btn-primary" id="calc-btn-next" onclick="changeCalcStep(1)">
+                  Next <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Live Calculator Results Sidepanel -->
+          <div class="calculator-results">
+            <div class="card score-display-card glow-green">
+              <div class="score-metric">
+                <h4 class="mb-1">Estimated Footprint</h4>
+                <div class="score-value" id="calc-footprint-value">0.0</div>
+                <div class="score-unit">Tons CO₂e / Year</div>
+              </div>
+              <div class="score-metric text-center">
+                <h5 class="mb-1">Current Rating</h5>
+                <div class="score-status" id="calc-status-badge">Calculating...</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="mb-2"><i class="fa-solid fa-microchip text-teal"></i> AI Live Recommendations</h3>
+              <div class="ai-recommendations" id="calc-recs-container">
+                <p class="text-secondary text-center">Slide the values or move through steps to receive AI recommendations.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           3. ECOBOT CHAT TAB
+           ========================================== -->
+      <section id="tab-chat" class="tab-section">
+        <h2 class="section-title"><i class="fa-solid fa-robot gradient-text-ai"></i> EcoBot AI Sustainability Assistant</h2>
+        <p class="section-desc">EcoBot uses a natural language query engine to explain climate actions, carbon metrics, and guide you on zero-carbon choices.</p>
+
+        <div class="chat-container-layout">
+          <!-- Sidebar suggested prompts -->
+          <div class="card chat-sidebar">
+            <h3>Eco-Topics</h3>
+            <p class="text-secondary mb-2">Click a prompt below to consult the AI about sustainability terms:</p>
+            <div class="suggested-prompts">
+              <button class="prompt-pill" onclick="sendChatPrompt('What is carbon footprint and how is it measured?')">
+                <i class="fa-solid fa-circle-question"></i> What is a Carbon Footprint?
+              </button>
+              <button class="prompt-pill" onclick="sendChatPrompt('How does eating meat increase carbon emissions?')">
+                <i class="fa-solid fa-utensils"></i> Meat Diet Carbon Impact
+              </button>
+              <button class="prompt-pill" onclick="sendChatPrompt('What is SDG 13 and why is it important?')">
+                <i class="fa-solid fa-globe"></i> What is SDG 13?
+              </button>
+              <button class="prompt-pill" onclick="sendChatPrompt('Give me 5 simple ways to save energy at home.')">
+                <i class="fa-solid fa-lightbulb"></i> Save Energy at Home
+              </button>
+              <button class="prompt-pill" onclick="sendChatPrompt('How do offsets work? Are carbon credits reliable?')">
+                <i class="fa-solid fa-leaf"></i> Carbon Offsets Explained
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Window -->
+          <div class="card chat-window">
+            <div class="chat-messages" id="chat-messages-box">
+              <div class="chat-msg bot">
+                Hello! I am <strong>EcoBot</strong>, your AI Sustainability Assistant. Ask me anything about climate change, renewable energy, reducing waste, or strategies to optimize your carbon footprint!
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <input type="text" class="input-control" id="chat-user-input" placeholder="Ask EcoBot about carbon offsets, green tech, or SDG 13..." onkeydown="if(event.key === 'Enter') handleChatSubmit()">
+              <button class="btn btn-ai" onclick="handleChatSubmit()">
+                Send <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           4. SMART GRID NEURAL NETWORK SIMULATOR
+           ========================================== -->
+      <section id="tab-grid" class="tab-section">
+        <h2 class="section-title"><i class="fa-solid fa-network-wired gradient-text-ai"></i> AI Smart Grid Energy Optimizer</h2>
+        <p class="section-desc">This tool runs a live **Artificial Neural Network (ANN)** training cycle in your browser. The neural network learns to manage household battery reserves and turn off non-essential loads dynamically, keeping grid demand balanced and reducing carbon intensity.</p>
+
+        <div class="smart-grid-layout">
+          <!-- Canvas Visualizer -->
+          <div class="card nn-visualizer-card glow-purple">
+            <h3 class="mb-2">Neural Network Topology</h3>
+            <p class="text-secondary mb-2">Visual representation of nodes (Inputs, Hidden Layers, Output) and synapses adjusting weights in real-time.</p>
+            <canvas id="nn-canvas"></canvas>
+            <div class="nn-legend">
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--accent-teal);"></div>
+                <span>Inputs</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--accent-purple);"></div>
+                <span>Hidden Neurons</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--accent-green);"></div>
+                <span>Output Decision</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats & Control Panel -->
+          <div class="flex-column">
+            <div class="card">
+              <h3>Simulation Controls</h3>
+              <p class="text-secondary mb-2">Control training parameters and observe how the neural network updates.</p>
+              
+              <div class="sim-controls">
+                <button class="btn btn-ai w-100" id="btn-nn-train" onclick="toggleNNTraining()">
+                  <i class="fa-solid fa-play"></i> Start Training
+                </button>
+                <button class="btn w-100" onclick="resetNN()">
+                  <i class="fa-solid fa-rotate-left"></i> Reset Model
+                </button>
+              </div>
+
+              <div class="form-group">
+                <label for="input-grid-demand">Grid Stress Index (Grid Demand Volatility)</label>
+                <input type="range" class="input-control" id="input-grid-demand" min="1" max="10" value="5" oninput="changeGridDemand(this.value)">
+                <div class="d-flex justify-between mt-1 text-secondary">
+                  <span>Stable (1)</span>
+                  <span id="label-grid-demand" class="text-white">5 (Moderate)</span>
+                  <span>Volatile (10)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Training Metrics -->
+            <div class="sim-metrics-grid">
+              <div class="metric-box">
+                <div class="metric-box-title">Training Epoch</div>
+                <div class="metric-box-value" id="nn-epoch">0</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-box-title">Loss (Mean Square Error)</div>
+                <div class="metric-box-value" id="nn-loss">0.0000</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-box-title">AI Peak Load Reduction</div>
+                <div class="metric-box-value" style="color: var(--accent-green);" id="nn-reduction">0%</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-box-title">Emissions Saved</div>
+                <div class="metric-box-value" style="color: var(--accent-teal);" id="nn-emissions">0.0 kg</div>
+              </div>
+            </div>
+
+            <!-- Live Status Monitors -->
+            <div class="card live-simulation-view">
+              <h4 class="mb-2">Household Live Dashboard</h4>
+              
+              <div class="live-bar-container">
+                <div class="live-bar-label">
+                  <span>Grid Demand (MW)</span>
+                  <span id="label-live-grid">5.2 MW</span>
+                </div>
+                <div class="live-bar-track">
+                  <div class="live-bar-fill fill-purple" id="fill-live-grid"></div>
+                </div>
+              </div>
+
+              <div class="live-bar-container">
+                <div class="live-bar-label">
+                  <span>Battery State of Charge</span>
+                  <span id="label-live-battery">50%</span>
+                </div>
+                <div class="live-bar-track">
+                  <div class="live-bar-fill fill-green" id="fill-live-battery"></div>
+                </div>
+              </div>
+
+              <div class="live-bar-container">
+                <div class="live-bar-label">
+                  <span>Solar Energy Output</span>
+                  <span id="label-live-solar">2.8 kW</span>
+                </div>
+                <div class="live-bar-track">
+                  <div class="live-bar-fill fill-teal" id="fill-live-solar"></div>
+                </div>
+              </div>
+
+              <div class="live-bar-container">
+                <div class="live-bar-label">
+                  <span>Grid Carbon Intensity</span>
+                  <span id="label-live-intensity">380 g/kWh</span>
+                </div>
+                <div class="live-bar-track">
+                  <div class="live-bar-fill fill-orange" id="fill-live-intensity"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           5. GOAL & TASK TRACKER TAB
+           ========================================== -->
+      <section id="tab-goals" class="tab-section">
+        <h2 class="section-title"><i class="fa-solid fa-list-check gradient-text"></i> Eco Goals & Impact Tracker</h2>
+        <p class="section-desc">Commit to daily or weekly sustainable actions. Completing actions reduces your carbon footprint score in real-time, showing your path to carbon neutrality.</p>
+
+        <div class="goals-layout">
+          <!-- Left progress circle -->
+          <div class="card flex-column align-center">
+            <h3>Target Completion</h3>
+            <p class="text-secondary text-center mb-1">Track your progress toward completing your current eco-targets</p>
+            
+            <div class="progress-ring-container">
+              <svg width="200" height="200" viewBox="0 0 200 200">
+                <!-- Outer Track -->
+                <circle cx="100" cy="100" r="80" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="12" />
+                <!-- Active Progress -->
+                <circle id="goal-progress-circle" cx="100" cy="100" r="80" fill="transparent" stroke="var(--accent-green)" stroke-width="12" 
+                  stroke-dasharray="502.6" stroke-dashoffset="502.6" stroke-linecap="round" transform="rotate(-90 100 100)" style="transition: stroke-dashoffset 0.6s ease;" />
+              </svg>
+              <div class="progress-text">
+                <div class="value" id="goal-progress-percent">0%</div>
+                <div class="label">Achieved</div>
+              </div>
+            </div>
+
+            <div class="text-center">
+              <h4 id="goals-count-label">0 of 6 Tasks Completed</h4>
+              <p class="text-secondary mt-1">Total Carbon Reduction: <span class="font-weight-600 text-white" id="goals-total-offset">0.0 kg CO₂</span></p>
+            </div>
+          </div>
+
+          <!-- Tasks Checklist -->
+          <div class="card">
+            <h3>Commitment List</h3>
+            <p class="text-secondary mb-3">Mark items as completed to register their carbon offset. Complete goals to unlock sustainable ratings!</p>
+            
+            <div class="task-list" id="goals-task-list">
+              <!-- Rendered dynamically via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <p>© 2026 EcoTrace AI. Built to support the United Nations Sustainable Development Goals.</p>
+      <div class="sdg-badge">
+        <i class="fa-solid fa-leaf"></i> SDG 13: Climate Action
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="ai-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
